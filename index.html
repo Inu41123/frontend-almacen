@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Almacén v2.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+
+    <main class="container mt-4">
+        <h1 class="mb-4">📦 Control de Almacén v2.0</h1>
+
+        <div class="row g-5">
+            <div class="col-md-4">
+                <h3>Añadir Producto</h3>
+                <form id="form-producto" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        <div class="invalid-feedback">
+                            El nombre es obligatorio.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="stock" name="stock" value="0" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Categoría</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="" disabled selected>Elige una categoría...</option>
+                            <option value="General">General</option>
+                            <option value="Electronica">Electrónica</option>
+                            <option value="Ropa">Ropa</option>
+                            <option value="Hogar">Hogar</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Selecciona una categoría.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label">Imagen del Producto</label>
+                        <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
+                        <div class="invalid-feedback">
+                            La imagen es obligatoria.
+                        </div>
+                    </div>
+
+                    <img id="img-preview" src="" alt="Previsualización" class="img-fluid rounded mb-3" style="max-height: 200px; display: none;">
+
+                    <button type="submit" class="btn btn-primary w-100">Guardar Producto</button>
+                </form>
+            </div>
+
+            <div class="col-md-8">
+                <h3>Inventario Actual</h3>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">Imagen</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Categoría</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-productos">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="modal-editar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Producto</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-editar">
+                        <input type="hidden" id="edit-id" name="id">
+                        <div class="mb-3">
+                            <label for="edit-nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="edit-descripcion" name="descripcion" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-stock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="edit-stock" name="stock" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-category" class="form-label">Categoría</label>
+                            <select class="form-select" id="edit-category" name="category" required>
+                                <option value="General">General</option>
+                                <option value="Electronica">Electrónica</option>
+                                <option value="Ropa">Ropa</option>
+                                <option value="Hogar">Hogar</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-imagen" class="form-label">Cambiar Imagen (Opcional)</label>
+                            <input type="file" class="form-control" id="edit-imagen" name="imagen" accept="image/*">
+                            <div class="form-text">Si no seleccionas una imagen nueva, se conservará la anterior.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-guardar-cambios">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</body>
+</html>
