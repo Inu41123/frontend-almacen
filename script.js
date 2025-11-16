@@ -1,7 +1,7 @@
 // ====================================================
 // ¡¡IMPORTANTE!! Usa tu URL de localhost para probar
 // ====================================================
-const API_URL = 'https://api-almacen.onrender.com';
+const API_URL = 'http://localhost:3000/productos';
 
 // --- Referencias del DOM ---
 const formProducto = document.getElementById('form-producto');
@@ -9,21 +9,18 @@ const tablaProductos = document.getElementById('tabla-productos');
 const imgPreview = document.getElementById('img-preview');
 const inputImagen = document.getElementById('imagen');
 
-// Referencias de Filtros
-const filtroNombre = document.getElementById('filtro-nombre');
-const filtroCategoria = document.getElementById('filtro-categoria');
+// (Referencias de Filtros ELIMINADAS)
 
 // Referencias del Modal de Edición
 const modalEditar = new bootstrap.Modal(document.getElementById('modal-editar'));
 const formEditar = document.getElementById('form-editar');
 const btnGuardarCambios = document.getElementById('btn-guardar-cambios');
 
-// Almacén global para los productos (para los filtros)
+// Almacén global para los productos (se queda para la función de editar)
 let todosLosProductos = [];
 
 
-// --- (NUEVO) Validación de Bootstrap ---
-// Deshabilita el envío si el formulario no es válido
+// --- Validación de Bootstrap (Se queda igual) ---
 (function () {
     'use strict';
     const forms = document.querySelectorAll('.needs-validation');
@@ -38,7 +35,7 @@ let todosLosProductos = [];
     });
 })();
 
-// --- (NUEVO) Previsualización de Imagen ---
+// --- Previsualización de Imagen (Se queda igual) ---
 inputImagen.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -54,34 +51,19 @@ inputImagen.addEventListener('change', (e) => {
     }
 });
 
-// --- (NUEVO) Filtros ---
-filtroNombre.addEventListener('input', () => pintarTabla(todosLosProductos));
-filtroCategoria.addEventListener('change', () => pintarTabla(todosLosProductos));
-
-function aplicarFiltros(productos) {
-    const texto = filtroNombre.value.toLowerCase();
-    const categoria = filtroCategoria.value;
-
-    return productos.filter(prod => {
-        const nombreMatch = prod.nombre.toLowerCase().includes(texto);
-        const categoriaMatch = (categoria === 'todos' || prod.category === categoria);
-        return nombreMatch && categoriaMatch;
-    });
-}
+// --- (Sección de Filtros ELIMINADA) ---
 
 // --- (MODIFICADO) Pintar la Tabla ---
-// Se separa la lógica de pintar para poder usarla con los filtros
+// (Simplificada: ya no llama a 'aplicarFiltros')
 function pintarTabla(productos) {
     tablaProductos.innerHTML = ''; // Limpiar la tabla
 
-    const productosFiltrados = aplicarFiltros(productos);
-
-    if (productosFiltrados.length === 0) {
-        tablaProductos.innerHTML = '<tr><td colspan="5" class="text-center">No se encontraron productos.</td></tr>';
+    if (productos.length === 0) {
+        tablaProductos.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos en el almacén.</td></tr>';
         return;
     }
 
-    productosFiltrados.forEach(prod => {
+    productos.forEach(prod => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
@@ -113,7 +95,7 @@ async function cargarProductos() {
         
         if (!respuesta.ok) throw new Error('Error al cargar productos');
         
-        pintarTabla(todosLosProductos); // Pintamos usando el almacén
+        pintarTabla(todosLosProductos); // Pintamos la tabla con todos los productos
 
     } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -121,133 +103,95 @@ async function cargarProductos() {
     }
 }
 
-// --- CREATE (Manejar el envío del formulario) ---
+// --- CREATE (Se queda igual) ---
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // Re-chequea la validación de Bootstrap
     if (!formProducto.checkValidity()) {
         formProducto.classList.add('was-validated');
         return;
     }
-
     const formData = new FormData(formProducto);
-    
-    // (Opcional) Deshabilita el botón para evitar doble click
     const btnSubmit = formProducto.querySelector('button[type="submit"]');
     btnSubmit.disabled = true;
     btnSubmit.innerText = 'Guardando...';
-
     try {
         const respuesta = await fetch(API_URL, {
             method: 'POST',
             body: formData 
         });
-
         const nuevoProducto = await respuesta.json();
-
         if (!respuesta.ok) {
             throw new Error(nuevoProducto.mensaje || 'Error al crear el producto');
         }
-
         console.log('Producto creado:', nuevoProducto);
-
-        // Limpiamos todo
         formProducto.reset();
         formProducto.classList.remove('was-validated');
         imgPreview.style.display = 'none';
-        
-        cargarProductos(); // Recargamos la tabla
-
+        cargarProductos();
     } catch (error) {
         console.error('Error al crear producto:', error);
         alert('Error al crear producto: ' + error.message);
     } finally {
-        // Vuelve a habilitar el botón
         btnSubmit.disabled = false;
         btnSubmit.innerText = 'Guardar Producto';
     }
 });
 
-// --- (NUEVO) DELETE (Borrar un producto) ---
+// --- DELETE (Se queda igual) ---
 async function borrarProducto(id) {
     if (!confirm('¿Seguro que quieres borrar este producto? Esta acción no se puede deshacer.')) {
         return;
     }
-
     try {
         const respuesta = await fetch(`${API_URL}/${id}`, {
             method: 'DELETE'
         });
-
         const data = await respuesta.json();
-
         if (!respuesta.ok) {
             throw new Error(data.mensaje || 'Error al borrar');
         }
-
         console.log(data.mensaje);
-        cargarProductos(); // Recargamos la tabla
-
+        cargarProductos();
     } catch (error) {
         console.error('Error al borrar:', error);
         alert('Error al borrar: ' + error.message);
     }
 }
 
-// --- (NUEVO) UPDATE (Abrir y manejar el Modal de Edición) ---
-
-// 1. Abrir el modal y rellenar los campos
+// --- UPDATE (Se queda igual) ---
 function abrirModalEditar(id) {
-    // Buscar el producto en nuestro almacén global
     const producto = todosLosProductos.find(p => p._id === id);
     if (!producto) return;
-
-    // Rellenar el formulario del modal
     document.getElementById('edit-id').value = producto._id;
     document.getElementById('edit-nombre').value = producto.nombre;
     document.getElementById('edit-descripcion').value = producto.descripcion;
     document.getElementById('edit-stock').value = producto.stock;
     document.getElementById('edit-category').value = producto.category;
-    document.getElementById('edit-imagen').value = ''; // Limpiar el input de imagen
-
-    // Mostrar el modal
+    document.getElementById('edit-imagen').value = '';
     modalEditar.show();
 }
 
-// 2. Escuchar el clic en el botón "Guardar Cambios" del modal
 btnGuardarCambios.addEventListener('click', async () => {
-    
-    // Creamos un FormData a partir del formulario de EDICIÓN
     const formData = new FormData(formEditar);
     const id = formData.get('id');
-
-    // (Opcional) Deshabilita el botón
     btnGuardarCambios.disabled = true;
     btnGuardarCambios.innerText = 'Guardando...';
-
     try {
         const respuesta = await fetch(`${API_URL}/${id}`, {
             method: 'PUT',
-            body: formData // Mandamos el FormData (la API sabrá si viene imagen o no)
+            body: formData
         });
-
         const productoActualizado = await respuesta.json();
-        
         if (!respuesta.ok) {
             throw new Error(productoActualizado.mensaje || 'Error al actualizar');
         }
-
         console.log('Producto actualizado:', productoActualizado);
-        
-        modalEditar.hide(); // Ocultamos el modal
-        cargarProductos(); // Recargamos la tabla
-
+        modalEditar.hide();
+        cargarProductos();
     } catch (error) {
         console.error('Error al actualizar:', error);
         alert('Error al actualizar: ' + error.message);
     } finally {
-        // Vuelve a habilitar el botón
         btnGuardarCambios.disabled = false;
         btnGuardarCambios.innerText = 'Guardar Cambios';
     }
@@ -255,5 +199,4 @@ btnGuardarCambios.addEventListener('click', async () => {
 
 
 // --- ¡Arrancamos! ---
-// Carga los productos cuando la página se abre por primera vez
 cargarProductos();
