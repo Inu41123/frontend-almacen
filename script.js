@@ -1,7 +1,7 @@
 // ====================================================
 // ¡¡IMPORTANTE!! Usa tu URL de localhost para probar
 // ====================================================
-const API_URL = 'http://localhost:3000/productos';
+const API_URL = 'https://api-almacen.onrender.com/productos';
 
 // --- Referencias del DOM ---
 const formProducto = document.getElementById('form-producto');
